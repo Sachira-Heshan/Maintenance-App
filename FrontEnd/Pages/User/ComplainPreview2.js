@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState  , useEffect} from 'react';
 import { View, Alert, Text, Image, StyleSheet, TouchableOpacity, ScrollView, Dimensions , ActivityIndicator } from 'react-native';
 import { AuthContext } from '../../src/Context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
@@ -54,8 +54,13 @@ const Slideshow = ({ images }) => {
 
 const ComplainPreview = ({ route }) => {
 
+  useEffect(() => {
+    console.log('Complain preview 2');
+  }, []);
+
+
   const navigation = useNavigation();
-  const { title, location,subLocation, description, selectedImages } = route.params;
+  const { complainID,title, location,subLocation, description, selectedImages } = route.params;
 
   const imageUri = selectedImages[0];
 
@@ -125,30 +130,31 @@ const ComplainPreview = ({ route }) => {
   
     try {
       setLoading(true);
-      const firebaseLinks = await uploadImagesToFirebase(selectedImages);
-      console.log('Firebase links:', firebaseLinks);
+   
+      // Assuming you have the complaintId stored in a variable, replace 'your_complaint_id_here' with the actual ID
+      const complaintId = complainID;
   
-      // API call to submit data
-      await axios.post(`${BASE_URL}complains/add`, {
+      // API call to update data using PUT request
+      await axios.put(`${BASE_URL}complains/edit/${complaintId}`, {
         userID: userInfo.userId,
         title,
         location,
         subLocation,
         description,
         status: 'Pending',
-        complaineImages: firebaseLinks,
+        complaineImages: selectedImages,
       });
   
-      Alert.alert('Complain Submitted Successfully');
+      Alert.alert('Complaint Updated Successfully');
       navigation.navigate('UserDashboard');
     } catch (error) {
       console.log('Error during data submission:', error);
-      Alert.alert('Error submitting complain');
-    }
-    finally {
+      Alert.alert('Error updating complaint');
+    } finally {
       setLoading(false);
     }
   };
+  
   
 
   const handleEditData = () => {
